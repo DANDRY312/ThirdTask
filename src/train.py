@@ -11,7 +11,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # Инициализация DagsHub (автоматически настроит MLflow на облако)
-dagshub.init(repo_owner="DANDRY312", repo_name="ThirdTask", mlflow=True)
+dagshub.init(
+    repo_owner="DANDRY312",
+    repo_name="ThirdTask",
+    mlflow=True,
+    token=os.getenv("DAGSHUB_TOKEN"),
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

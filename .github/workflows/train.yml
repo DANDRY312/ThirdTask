@@ -2,7 +2,7 @@ name: Train and Report (CML)
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   pull-requests: write
@@ -12,6 +12,7 @@ permissions:
 jobs:
   run-experiment:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,6 +22,12 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
+
+      # Добавить этот блок
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Setup CML
         uses: iterative/setup-cml@v2
@@ -35,6 +42,11 @@ jobs:
         run: dvc pull
 
       - name: Воспроизведение пайплайна (обучение)
+
+        env:
+
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+
         run: dvc repro
 
       - name: Создание отчета CML
@@ -46,5 +58,4 @@ jobs:
           dvc params diff main --md >> report.md
           echo "### Изменения метрик:" >> report.md
           dvc metrics diff main --md >> report.md
-          # Отправка отчета в Pull Request
           cml comment create report.md
