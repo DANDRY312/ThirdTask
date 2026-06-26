@@ -2,21 +2,20 @@ name: ML Pipeline CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+
+permissions:
+  contents: read
 
 jobs:
-  test-and-report:
+  test:
     runs-on: ubuntu-latest
-    # Используем официальный контейнер, где всё предустановлено
-    container: docker://ghcr.io/iterative/cml:0
 
     steps:
       - name: Checkout кода
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -27,7 +26,7 @@ jobs:
       - name: Установка зависимостей
         run: pip install -r requirements.txt
 
-      - name: Загрузка данных через DVC
+      - name: Загрузка данных
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -35,13 +34,3 @@ jobs:
 
       - name: Запуск тестов
         run: pytest tests/
-
-      - name: Воспроизведение пайплайна и отчет
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          dvc repro
-          echo "## Отчет об эксперименте" > report.md
-          echo "### Метрики:" >> report.md
-          dvc metrics diff main --md >> report.md
-          cml comment create report.md

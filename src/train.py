@@ -5,14 +5,12 @@ import json
 import pandas as pd
 import mlflow
 import mlflow.sklearn
-import dagshub
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # Инициализация DagsHub (автоматически настроит MLflow на облако)
-dagshub.init(repo_owner="DANDRY312", repo_name="ThirdTask", mlflow=True)
-
+# В src/train.py оставь только это:
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
