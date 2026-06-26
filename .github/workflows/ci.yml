@@ -9,8 +9,7 @@ on:
 jobs:
   test-and-report:
     runs-on: ubuntu-latest
-    # Используем официальный контейнер, где всё предустановлено
-    container: docker://ghcr.io/iterative/cml:0
+    # ❗ УБИРАЕМ container: docker://ghcr.io/iterative/cml:0
 
     steps:
       - name: Checkout кода
@@ -23,6 +22,9 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
+
+      - name: Install CML        # <-- добавляем этот шаг
+        run: pip install cml
 
       - name: Установка зависимостей
         run: pip install -r requirements.txt
