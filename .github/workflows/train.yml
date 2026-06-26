@@ -1,3 +1,13 @@
+name: Train and Report (CML)
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   run-experiment:
     runs-on: ubuntu-latest
@@ -5,21 +15,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      - name: Install CML          # <-- вместо Setup CML
+
+      - name: Install CML
         run: pip install cml
+
       - name: Установка зависимостей
         run: pip install -r requirements.txt
+
       - name: Загрузка данных
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: dvc pull
-      - name: Воспроизведение пайплайна
+
+      - name: Воспроизведение пайплайна (обучение)
         run: dvc repro
+
       - name: Создание отчета CML
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
