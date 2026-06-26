@@ -2,7 +2,7 @@ name: ML Pipeline CI
 
 on:
   push:
-    branches: [ "main", "experiment/tune-cml7" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
