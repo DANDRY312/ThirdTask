@@ -2,17 +2,24 @@ name: ML Pipeline CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "experiment/tune-cml" ]
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  pull-requests: write
+  contents: read
+  id-token: write
+
 jobs:
-  test:
+  test-and-report:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout кода
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -20,10 +27,15 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
+      - name: Установка системных зависимостей для CML
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
       - name: Установка зависимостей
         run: pip install -r requirements.txt
 
-      - name: Загрузка данных через DVC (из Cloud.ru)
+      - name: Загрузка данных через DVC
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -31,3 +43,16 @@ jobs:
 
       - name: Запуск тестов
         run: pytest tests/
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Воспроизведение пайплайна и отчет
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dvc repro
+          echo "## Отчет об эксперименте" > report.md
+          echo "### Метрики:" >> report.md
+          dvc metrics diff main --md >> report.md
+          cml comment create report.md
