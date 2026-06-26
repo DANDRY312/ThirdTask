@@ -1,0 +1,31 @@
+name: Uptime Monitor
+
+on:
+  schedule:
+    # Запуск каждый час ровно в 00 минут
+    - cron: '0 * * * *'
+  # Позволяет запустить workflow вручную из интерфейса GitHub
+  workflow_dispatch:
+
+jobs:
+  ping_server:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write   # Разрешаем боту создавать Issues
+
+    steps:
+      - name: Check Health Endpoint
+        # ЗАМЕНИТЕ URL на прямую ссылку вашего спейса!
+        run: |
+          curl --fail https://gyjgyjyfgjhjhjhv-iris-api-dryuchin.hf.space/health
+
+      - name: Create Issue on Failure
+        # Этот шаг выполнится ТОЛЬКО если curl выдаст ошибку (сервер лежит)
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --repo ${{ github.repository }} \
+            --title "🚨 Сбой в продакшене: Сервер недоступен!" \
+            --body "Эндпоинт /health не ответил статусом 200. Проверьте логи сервера Hugging Face."
