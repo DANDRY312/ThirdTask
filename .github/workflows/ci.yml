@@ -2,18 +2,15 @@ name: ML Pipeline CI
 
 on:
   push:
-    branches: [ "main", "experiment/tune-cml" ]
+    branches: [ "main", "experiment/tune-cml5" ]
   pull_request:
     branches: [ "main" ]
-
-permissions:
-  pull-requests: write
-  contents: read
-  id-token: write
 
 jobs:
   test-and-report:
     runs-on: ubuntu-latest
+    # Используем официальный контейнер, где всё предустановлено
+    container: docker://ghcr.io/iterative/cml:0
 
     steps:
       - name: Checkout кода
@@ -27,11 +24,6 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Установка системных зависимостей для CML
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-
       - name: Установка зависимостей
         run: pip install -r requirements.txt
 
@@ -43,9 +35,6 @@ jobs:
 
       - name: Запуск тестов
         run: pytest tests/
-
-      - name: Setup CML
-        uses: iterative/setup-cml@v2
 
       - name: Воспроизведение пайплайна и отчет
         env:
