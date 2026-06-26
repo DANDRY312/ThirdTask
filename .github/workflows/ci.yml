@@ -23,8 +23,8 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Install CML        # <-- добавляем этот шаг
-        run: pip install cml
+      - name: Install CML
+        run: pip install 'dvc[cml]'
 
       - name: Установка зависимостей
         run: pip install -r requirements.txt

@@ -22,7 +22,7 @@ jobs:
           cache: 'pip'
 
       - name: Install CML
-        run: pip install cml
+        run: pip install 'dvc[cml]'
 
       - name: Установка зависимостей
         run: pip install -r requirements.txt
